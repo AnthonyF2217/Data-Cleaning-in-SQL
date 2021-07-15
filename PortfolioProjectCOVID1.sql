@@ -1,5 +1,5 @@
 
--- Selct data that I will be using
+-- Selcting some data
 
 SELECT Location, Date, Total_Cases, New_Cases, Total_Deaths, Population
 FROM CovidDeaths
@@ -122,7 +122,7 @@ WHERE dea.Continent IS NOT NULL
 SELECT *, (RollingPeopleVaccinated/Population)*100
 FROM #PercentPopulationVaccinated
 
--- Creating view to store for later visualizations
+-- Creating views to store for later visualizations
 
 CREATE VIEW PercentPopulationVaccinated AS
 SELECT dea.Continent, dea.Location, dea.Date, dea.Population, vac.New_Vaccinations
@@ -134,5 +134,19 @@ JOIN CovidVaccinations AS Vac
 WHERE dea.Continent IS NOT NULL
 --ORDER BY 2, 3
 
-SELECT *
-FROM PercentPopulationVaccinated
+CREATE VIEW GlobalNumbers AS
+SELECT Date, SUM(New_Cases) AS TotalCases, SUM(CAST(New_Deaths AS int)) AS TotalDeaths, SUM(CAST(New_Deaths AS int))/SUM(New_Cases)*100 AS DeathPercentage
+FROM CovidDeaths
+WHERE Continent IS NOT NULL
+GROUP BY Date
+
+CREATE VIEW PercentPopulationInfected AS
+SELECT Location, Population, MAX(Total_Cases) AS InfectionCount, Max((Total_Cases/Population))*100 AS PercentPopulationInfected
+FROM CovidDeaths
+GROUP BY Location, Population
+
+CREATE VIEW TotalDeathCount AS
+SELECT Location, MAX(CAST(Total_Deaths AS int)) AS TotalDeathCount
+FROM CovidDeaths
+WHERE Continent IS NOT NULL
+GROUP BY Location
